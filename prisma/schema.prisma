@@ -1,0 +1,227 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  PHARMACY_STAFF
+  PRACTICE_STAFF
+  PROVIDER
+  ADMIN
+}
+
+enum RefillState {
+  NEW
+  PHARMACY_REVIEW
+  BLOCKED
+  MISSING_INFORMATION
+  AWAITING_PROVIDER
+  AWAITING_PATIENT
+  AWAITING_INSURANCE
+  ACTION_REQUIRED
+  IN_REVIEW
+  APPROVAL_RECEIVED
+  PHARMACY_PROCESSING
+  RESOLVED
+  ESCALATED
+  CANCELLED
+}
+
+enum BlockerType {
+  NO_REFILLS
+  PROVIDER_APPROVAL
+  PROVIDER_REVIEW
+  VISIT_REQUIRED
+  MISSING_INFORMATION
+  INSURANCE_BLOCK
+  ADMINISTRATIVE_BLOCK
+  UNKNOWN
+}
+
+enum Priority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum TaskStatus {
+  OPEN
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum CommunicationChannel {
+  PORTAL
+  PHONE
+  FAX
+  MOCK_API
+}
+
+enum AuditAction {
+  STATE_TRANSITION
+  ASSIGNMENT
+  COMMUNICATION
+  ESCALATION
+  VERIFICATION
+  SYSTEM
+}
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  users     User[]
+  patients  Patient[]
+  pharmacies Pharmacy[]
+  providers Provider[]
+  refills   RefillRequest[]
+}
+
+model User {
+  id             String          @id @default(cuid())
+  organizationId String
+  name           String
+  email          String          @unique
+  role           UserRole
+  createdAt      DateTime        @default(now())
+  organization   Organization    @relation(fields: [organizationId], references: [id])
+  assignedTasks  WorkflowTask[]  @relation("AssignedTasks")
+  auditLogs      AuditLog[]
+  recommendations AIRecommendation[]
+  communications Communication[]
+}
+
+model Patient {
+  id             String        @id @default(cuid())
+  organizationId String
+  displayName    String
+  syntheticId    String        @unique
+  dateOfBirth    DateTime?
+  createdAt      DateTime      @default(now())
+  organization   Organization  @relation(fields: [organizationId], references: [id])
+  refills        RefillRequest[]
+}
+
+model Medication {
+  id               String         @id @default(cuid())
+  name             String
+  strength         String
+  refillRequests   RefillRequest[]
+}
+
+model Pharmacy {
+  id             String         @id @default(cuid())
+  organizationId String
+  name           String
+  location       String
+  organization   Organization   @relation(fields: [organizationId], references: [id])
+  refills        RefillRequest[]
+}
+
+model Provider {
+  id             String         @id @default(cuid())
+  organizationId String
+  name           String
+  specialty      String
+  organization   Organization   @relation(fields: [organizationId], references: [id])
+  refills        RefillRequest[]
+}
+
+model RefillRequest {
+  id                    String             @id @default(cuid())
+  organizationId        String
+  patientId             String
+  medicationId          String
+  pharmacyId            String
+  providerId            String
+  state                 RefillState        @default(NEW)
+  blocker               BlockerType?
+  priority              Priority           @default(NORMAL)
+  refillsRemaining      Int                @default(0)
+  requiredInformation   String?
+  insuranceStatus       String?
+  nextAction            String?
+  reason                String?
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+  resolvedAt            DateTime?
+  organization          Organization       @relation(fields: [organizationId], references: [id])
+  patient               Patient            @relation(fields: [patientId], references: [id])
+  medication            Medication         @relation(fields: [medicationId], references: [id])
+  pharmacy              Pharmacy           @relation(fields: [pharmacyId], references: [id])
+  provider              Provider           @relation(fields: [providerId], references: [id])
+  tasks                 WorkflowTask[]
+  communications       Communication[]
+  auditLogs             AuditLog[]
+  aiRecommendations     AIRecommendation[]
+
+  @@index([organizationId, state])
+  @@index([organizationId, priority])
+}
+
+model WorkflowTask {
+  id         String     @id @default(cuid())
+  refillId   String
+  assigneeId String?
+  title      String
+  status     TaskStatus @default(OPEN)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  refill     RefillRequest @relation(fields: [refillId], references: [id])
+  assignee   User?      @relation("AssignedTasks", fields: [assigneeId], references: [id])
+}
+
+model Communication {
+  id             String              @id @default(cuid())
+  refillId       String
+  senderId       String?
+  channel        CommunicationChannel
+  recipient      String
+  recipientRole  String
+  message        String
+  integration    String              @default("MOCK")
+  succeeded      Boolean             @default(false)
+  errorMessage   String?
+  attemptCount   Int                 @default(1)
+  createdAt      DateTime            @default(now())
+  refill         RefillRequest       @relation(fields: [refillId], references: [id])
+  sender         User?               @relation(fields: [senderId], references: [id])
+}
+
+model AuditLog {
+  id            String       @id @default(cuid())
+  refillId      String
+  userId        String?
+  action        AuditAction  @default(STATE_TRANSITION)
+  previousState RefillState?
+  newState      RefillState?
+  reason        String
+  metadata      Json?
+  createdAt     DateTime     @default(now())
+  refill        RefillRequest @relation(fields: [refillId], references: [id])
+  user          User?        @relation(fields: [userId], references: [id])
+
+  @@index([refillId, createdAt])
+}
+
+model AIRecommendation {
+  id                    String       @id @default(cuid())
+  refillId              String
+  createdById           String?
+  recommendation        String
+  explanation           String
+  blocker               BlockerType
+  confidence            Float
+  responsibleRole       UserRole
+  humanReviewRequired   Boolean      @default(true)
+  communicationSummary  String?
+  createdAt             DateTime     @default(now())
+  refill                RefillRequest @relation(fields: [refillId], references: [id])
+  createdBy             User?        @relation(fields: [createdById], references: [id])
+}

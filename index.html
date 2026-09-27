@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RxRelay | Refill operations prototype</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-mark">R</span><span>rx<span class="brand-rx">relay</span></span></div>
+      <div class="workspace-switcher"><span class="avatar avatar-blue">NP</span><span><strong>Northstar Primary</strong><small>Care operations</small></span><span class="chevron">⌄</span></div>
+      <nav class="nav" aria-label="Main navigation">
+        <p class="nav-label">Workspace</p>
+        <button class="nav-item active"><span class="nav-icon">▦</span> Refill queue <b class="nav-count">18</b></button>
+        <button class="nav-item"><span class="nav-icon">◷</span> My work <b class="nav-count muted">5</b></button>
+        <button class="nav-item"><span class="nav-icon">⌁</span> Patients</button>
+        <p class="nav-label">Insights</p>
+        <button class="nav-item"><span class="nav-icon">⌁</span> Outcomes</button>
+        <button class="nav-item"><span class="nav-icon">◫</span> Activity log</button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="integration-status"><span class="status-dot"></span><span><strong>Systems connected</strong><small>Last sync 2 min ago</small></span></div>
+        <button class="nav-item"><span class="nav-icon">⚙</span> Settings</button>
+        <div class="profile"><span class="avatar avatar-coral">AM</span><span><strong>Alex Morgan</strong><small>Practice manager</small></span><span class="more">•••</span></div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div class="breadcrumbs"><span>Northstar Primary</span><span class="slash">/</span><strong>Refill queue</strong></div>
+        <div class="top-actions"><button class="icon-button" title="Search">⌕</button><button class="icon-button notification" title="Notifications">♧<i></i></button><div class="top-avatar">AM</div></div>
+      </header>
+
+      <div class="page-wrap">
+        <section class="page-heading">
+          <div><p class="eyebrow">MONDAY, SEPTEMBER 28, 2026</p><h1>Good morning, Alex.</h1><p class="subheading">Here’s what needs your team’s attention today.</p></div>
+          <button class="primary-button" id="new-refill"><span>＋</span> Add refill</button>
+        </section>
+
+        <section class="metric-grid" aria-label="Queue summary">
+          <article class="metric-card accent-coral"><div class="metric-top"><span class="metric-label">Needs attention</span><span class="metric-icon coral">!</span></div><strong class="metric-value">18</strong><span class="metric-change up">↗ 4 since yesterday</span></article>
+          <article class="metric-card accent-amber"><div class="metric-top"><span class="metric-label">At risk today</span><span class="metric-icon amber">◷</span></div><strong class="metric-value">6</strong><span class="metric-change neutral">2 due in the next 2 hrs</span></article>
+          <article class="metric-card accent-green"><div class="metric-top"><span class="metric-label">Resolved this week</span><span class="metric-icon green">✓</span></div><strong class="metric-value">42</strong><span class="metric-change up">↗ 12% vs last week</span></article>
+          <article class="metric-card accent-blue"><div class="metric-top"><span class="metric-label">Median time to fill</span><span class="metric-icon blue">↗</span></div><strong class="metric-value">3.4 <small>hrs</small></strong><span class="metric-change down">↘ 28 min vs last week</span></article>
+        </section>
+
+        <section class="queue-section">
+          <div class="section-heading"><div><h2>Refills needing attention <span class="live-pill"><i></i> Live</span></h2><p>Prioritized by urgency, patient impact, and next best action.</p></div><button class="text-button" id="export-btn">Export queue <span>↗</span></button></div>
+          <div class="toolbar"><div class="search-box"><span>⌕</span><input id="search-input" type="search" placeholder="Search patient, medication, or Rx number" /></div><div class="filter-buttons"><button class="filter-button active" data-filter="all">All <b>18</b></button><button class="filter-button" data-filter="urgent">Urgent <b>6</b></button><button class="filter-button" data-filter="mine">My work <b>5</b></button><button class="filter-button" data-filter="new">Unassigned <b>3</b></button></div><button class="filter-icon" title="More filters">☷</button></div>
+          <div class="queue-table-wrap"><table class="queue-table"><thead><tr><th>Patient / medication</th><th>Blocker</th><th>Owner</th><th>Due</th><th>Status</th><th></th></tr></thead><tbody id="queue-body"></tbody></table></div>
+          <div class="table-footer"><span>Showing <strong id="showing-count">6</strong> of 18 refills</span><div class="pagination"><button disabled>‹</button><button class="page-active">1</button><button>2</button><button>3</button><button>›</button></div></div>
+        </section>
+
+        <section class="bottom-grid">
+          <article class="activity-panel"><div class="section-heading compact"><div><h2>Team activity</h2><p>Latest actions across your refill queue.</p></div><button class="text-button">View all <span>→</span></button></div><div class="activity-list"><div class="activity-item"><span class="activity-avatar green-bg">✓</span><div><p><strong>Priya S.</strong> sent a provider question for <strong>Elena Rodriguez</strong></p><small>2 minutes ago · Lisinopril 20mg</small></div></div><div class="activity-item"><span class="activity-avatar blue-bg">↗</span><div><p><strong>RxRelay</strong> received approval for <strong>Marcus Chen</strong></p><small>18 minutes ago · Metformin ER 500mg</small></div></div><div class="activity-item"><span class="activity-avatar amber-bg">!</span><div><p><strong>Jamal T.</strong> flagged an insurance issue</p><small>34 minutes ago · Eliquis 5mg</small></div></div></div></article>
+          <article class="insight-panel"><div class="insight-header"><span class="sparkle">✦</span><div><h2>One thing to know</h2><p>AI-assisted queue insight</p></div></div><p class="insight-copy">Most delays this week are happening after <strong>coverage checks</strong>. Adding a formulary note before sending to a provider could prevent <strong>5 repeat touches</strong>.</p><button class="insight-link">Review the pattern <span>→</span></button></article>
+        </section>
+      </div>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status"></div>
+  <div class="modal-backdrop" id="modal"><div class="modal"><button class="modal-close" id="modal-close">×</button><span class="modal-kicker">NEW WORK ITEM</span><h2>Add a refill to the queue</h2><p>Capture the minimum context needed to route this request safely.</p><label>Patient name<input id="patient-name" placeholder="e.g. Elena Rodriguez" /></label><label>Medication<input placeholder="e.g. Lisinopril 20mg" /></label><div class="modal-actions"><button class="secondary-button" id="modal-cancel">Cancel</button><button class="primary-button" id="modal-submit">Create refill</button></div></div></div>
+  <script src="app.js"></script>
+</body>
+</html>

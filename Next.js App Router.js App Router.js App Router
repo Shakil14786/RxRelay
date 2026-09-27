@@ -1,0 +1,17 @@
+Next.js App Router
+├── Dashboard and queue UI
+├── Refill detail and action center
+├── API routes/server actions
+├── Workflow transition service
+├── Deterministic blocker rules
+├── Optional Gemini adapter
+├── Prisma data layer
+└── PostgreSQL databaseNext.js App Router
+├── Dashboard and queue UI
+├── Refill detail and action center
+├── API routes/server actions
+├── Workflow transition service
+├── Deterministic blocker rules
+├── Optional Gemini adapter
+├── Prisma data layer
+└── PostgreSQL database
